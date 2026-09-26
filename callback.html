@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru" data-lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вход через Threads · Жанна Трашкова</title>
+<meta name="description" content="Threads sign-in — Zhanna Trashkova, interior designer, Astana">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/lang.js"></script>
+</head>
+<body>
+<header>
+  <a class="brand" href="index.html"><span lang="ru">Жанна Трашкова</span><span lang="en">Zhanna Trashkova</span></a>
+  <nav>
+    <a href="privacy.html"><span lang="ru">Конфиденциальность</span><span lang="en">Privacy</span></a>
+    <a href="data-deletion.html"><span lang="ru">Удаление данных</span><span lang="en">Data deletion</span></a>
+  </nav>
+  <div class="lang" role="group" aria-label="Language"><button data-l="ru" aria-pressed="true">RU</button><button data-l="en" aria-pressed="false">EN</button></div>
+</header>
+<main>
+<div lang="ru"><h1>Вход через Threads</h1></div>
+<div lang="en"><h1>Threads sign-in</h1></div>
+
+<div id="ok" class="card" hidden>
+  <p style="margin-top:0"><span lang="ru">Код авторизации получен. Скопируйте его и вставьте в приложение.</span><span lang="en">Authorization code received. Copy it and paste it into the app.</span></p>
+  <code id="code" class="code"></code>
+  <button id="copy" class="btn"><span lang="ru">Скопировать</span><span lang="en">Copy</span></button>
+  <span id="status" class="muted" style="margin-left:10px" aria-live="polite"></span>
+  <p class="muted" style="margin-bottom:0"><span lang="ru">Код действует недолго (около часа) и используется один раз.</span><span lang="en">The code is short-lived (about an hour) and single-use.</span></p>
+</div>
+
+<div id="err" class="card" hidden>
+  <p style="margin-top:0"><strong><span lang="ru">Авторизация не выполнена.</span><span lang="en">Authorization failed.</span></strong></p>
+  <code id="errtext" class="code"></code>
+</div>
+
+<div id="none" class="card" hidden>
+  <p style="margin:0"><span lang="ru">В адресе нет параметра <code>code</code>. Эта страница открывается автоматически после входа через Threads.</span><span lang="en">No <code>code</code> parameter in the URL. This page opens automatically after signing in with Threads.</span></p>
+</div>
+
+<script>
+(function(){
+  var p = new URLSearchParams(location.search);
+  var code = (p.get('code') || '').replace(/#_$/, '');
+  var err = p.get('error') || p.get('error_reason');
+  function show(id){ document.getElementById(id).hidden = false; }
+  if (code) {
+    document.getElementById('code').textContent = code;
+    show('ok');
+  } else if (err) {
+    var d = p.get('error_description');
+    document.getElementById('errtext').textContent = err + (d ? ': ' + d : '');
+    show('err');
+  } else {
+    show('none');
+  }
+  var status = document.getElementById('status');
+  function done(ok){
+    var ru = document.documentElement.getAttribute('data-lang') === 'ru';
+    status.textContent = ok ? (ru ? 'Скопировано ✓' : 'Copied ✓') : (ru ? 'Выделите код и нажмите Ctrl+C' : 'Select the code and press Ctrl+C');
+  }
+  function fallback(){
+    var r = document.createRange(); r.selectNodeContents(document.getElementById('code'));
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    done(ok);
+  }
+  document.getElementById('copy').addEventListener('click', function(){
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code).then(function(){ done(true); }, fallback);
+    } else { fallback(); }
+  });
+})();
+</script>
+</main>
+<footer>
+  <span lang="ru">Жанна Трашкова · дизайнер интерьера · Астана, Казахстан</span><span lang="en">Zhanna Trashkova · Interior designer · Astana, Kazakhstan</span>
+  · <a href="mailto:t-zhanna-t@hotmail.com">t-zhanna-t@hotmail.com</a>
+</footer>
+</body>
+</html>
